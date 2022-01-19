@@ -1,9 +1,8 @@
-import random
 import time
 import pygame
 import os
 import sys
-from PIL import Image
+
 
 if __name__ == '__main__':
     pygame.init()
@@ -18,9 +17,13 @@ if __name__ == '__main__':
     noi = 4
     frames_per_second = 8
     clock = pygame.time.Clock()
+    can_move = True
     background_sprites = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
-    tunnel_sprites = pygame.sprite.Group()
+    tunnel_sprites_part1 = pygame.sprite.Group()
+    tunnel_sprites_part2 = pygame.sprite.Group()
+    asteroids_collision_sprites = pygame.sprite.Group()
+    planet_sprites = pygame.sprite.Group()
 
 
     def load_image(name, colorkey=None):
@@ -62,9 +65,57 @@ if __name__ == '__main__':
             self.image = self.frames[self.cur_frame]
 
 
-    class AnimatedTunnel(pygame.sprite.Sprite):
+    class AnimatedTunnelPart1(pygame.sprite.Sprite):
         def __init__(self, sheet, columns, rows, x, y):
-            super().__init__(tunnel_sprites)
+            super().__init__(tunnel_sprites_part1)
+            self.frames = []
+            self.cut_sheet(sheet, columns, rows)
+            self.cur_frame = 0
+            self.image = self.frames[self.cur_frame]
+            self.rect = self.rect.move(x, y)
+
+        def cut_sheet(self, sheet, columns, rows):
+            self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                    sheet.get_height() // rows)
+            for j in range(rows):
+                for i in range(columns):
+                    frame_location = (self.rect.w * i, self.rect.h * j)
+
+                    tmp = sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size))
+                    self.frames.append(pygame.transform.scale(tmp, (1280, 760)))
+
+        def update(self):
+            self.cur_frame = int((time.time() - start_frame) * 15 % 15)
+            self.image = self.frames[self.cur_frame]
+
+
+    class AnimatedTunnelPart2(pygame.sprite.Sprite):
+        def __init__(self, sheet, columns, rows, x, y):
+            super().__init__(tunnel_sprites_part2)
+            self.frames = []
+            self.cut_sheet(sheet, columns, rows)
+            self.cur_frame = 0
+            self.image = self.frames[self.cur_frame]
+            self.rect = self.rect.move(x, y)
+
+        def cut_sheet(self, sheet, columns, rows):
+            self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                    sheet.get_height() // rows)
+            for j in range(rows):
+                for i in range(columns):
+                    frame_location = (self.rect.w * i, self.rect.h * j)
+                    tmp2 = sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size))
+                    self.frames.append(pygame.transform.scale(tmp2, (1280, 760)))
+
+        def update(self):
+            self.cur_frame = int((time.time() - start_frame) * 30 % 8)
+            self.image = self.frames[self.cur_frame]
+
+    class AsteroidCollision(pygame.sprite.Sprite):
+        def __init__(self, sheet, columns, rows, x, y):
+            super().__init__(asteroids_collision_sprites)
             self.frames = []
             self.cut_sheet(sheet, columns, rows)
             self.cur_frame = 0
@@ -85,23 +136,64 @@ if __name__ == '__main__':
             self.image = self.frames[self.cur_frame]
 
     jim_sprites = AnimatedSprite(load_image("jim_sprites.png"), 4, 1, 0, 0)
-    tunnel_image = load_image('tunnel_part1.png')
-    tunnel_image.set_alpha(170)
-    tunnel_sprites_ = AnimatedTunnel(tunnel_image, 5, 3, 0, 0)
-    jim_sprites.rect = jim_sprites.image.get_rect()
-    all_sprites.add(jim_sprites)
     jim_sprites.rect.x = 640
     jim_sprites.rect.y = 500
+
+    tunnel_image_part1 = load_image('tunnel_part1.png')
+    tunnel_image_part1.set_alpha(150)
+    tunnel_sprites_part1_ = AnimatedTunnelPart1(tunnel_image_part1, 5, 3, 0, 0)
+
+    tunnel_image_part2 = load_image('tunnel_part2.png')
+    tunnel_image_part2.set_alpha(170)
+    tunnel_sprites_part2_ = AnimatedTunnelPart2(tunnel_image_part2, 4, 2, 0, 0)
+
+    asteroids_col_sprites = AsteroidCollision(load_image("asteroids_collision.png"), 6, 1, 0, 0)
+
+    planet_sprite = pygame.sprite.Sprite()
+    planet_sprite.image = load_image('planet.png')
+    planet_sprite.rect = planet_sprite.image.get_rect()
+    planet_sprites.add(planet_sprite)
+
     background_image = load_image('background.png')
 
+    startTime = time.time()
+    lastTime = startTime
+
     def drawWindow():
+        global can_move
         x_rel = x_pos % width
         x_part2 = x_rel - width if x_rel > 0 else x_rel + width
         screen.blit(background_image, (x_rel, 0))
         screen.blit(background_image, (x_part2, 0))
+
+        if float('%s' % (totalTime)) < 60.01:
+            tunnel_sprites_part1.update()
+            tunnel_sprites_part1.draw(screen)
+        elif float('%s' % (totalTime)) > 60.01 and float('%s' % (totalTime)) < 65.01:
+            tunnel_sprites_part2.update()
+            tunnel_sprites_part2.draw(screen)
+        else:
+            can_move = False
+
+            screen.blit(background_image, (0, 0))
+
+            jim_sprites.rect.x += 6
+            jim_sprites.rect.y -= 6
+
+            size_x = 75
+            size_y = 53
+            sr_zn = (jim_sprites.rect.x - jim_sprites.rect.y) // 3
+
+            planet_sprite.rect.w = 100 if planet_sprite.rect.y == 0 else planet_sprite.rect.w
+
+            if planet_sprite.rect.w < 400:
+                planet_sprite.image = pygame.transform.scale(load_image('planet.png'), (size_x + sr_zn, size_y + sr_zn))
+                planet_sprite.rect = planet_sprite.image.get_rect()
+                planet_sprite.rect.y = 710 - sr_zn
+
+            planet_sprites.draw(screen)
+
         all_sprites.update()
-        tunnel_sprites.update()
-        tunnel_sprites.draw(screen)
         all_sprites.draw(screen)
 
 
@@ -110,16 +202,19 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
         clock.tick(fps)
+        lapTime = round(time.time() - lastTime, 2)
+        totalTime = round(time.time() - startTime, 2)
         drawWindow()
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            jim_sprites.rect.y = jim_sprites.rect.y - 5
-        elif keys[pygame.K_d]:
-            jim_sprites.rect.x = jim_sprites.rect.x + 5
-        elif keys[pygame.K_s]:
-            jim_sprites.rect.y = jim_sprites.rect.y + 5
-        elif keys[pygame.K_a]:
-            jim_sprites.rect.x = jim_sprites.rect.x - 5
+        if can_move:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_w]:
+                jim_sprites.rect.y = jim_sprites.rect.y - 5
+            elif keys[pygame.K_d]:
+                jim_sprites.rect.x = jim_sprites.rect.x + 5
+            elif keys[pygame.K_s]:
+                jim_sprites.rect.y = jim_sprites.rect.y + 5
+            elif keys[pygame.K_a]:
+                jim_sprites.rect.x = jim_sprites.rect.x - 5
         x_pos += v / fps
         pygame.display.flip()
     pygame.quit()
