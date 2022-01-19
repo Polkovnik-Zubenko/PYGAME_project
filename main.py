@@ -18,12 +18,16 @@ if __name__ == '__main__':
     frames_per_second = 8
     clock = pygame.time.Clock()
     can_move = True
+    pygame.mixer.music.load('data/background_sound.mp3')
+    pygame.mixer.music.play()
     background_sprites = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
     tunnel_sprites_part1 = pygame.sprite.Group()
     tunnel_sprites_part2 = pygame.sprite.Group()
     asteroids_collision_sprites = pygame.sprite.Group()
     planet_sprites = pygame.sprite.Group()
+    line_move_sprites = pygame.sprite.Group()
+    icon_jim_sprites = pygame.sprite.Group()
 
 
     def load_image(name, colorkey=None):
@@ -154,13 +158,29 @@ if __name__ == '__main__':
     planet_sprite.rect = planet_sprite.image.get_rect()
     planet_sprites.add(planet_sprite)
 
+    line_move_sprite = pygame.sprite.Sprite()
+    line_move_sprite.image = load_image('move_line.png')
+    line_move_sprite.rect = line_move_sprite.image.get_rect()
+    line_move_sprites.add(line_move_sprite)
+    line_move_sprite.rect.x = 80
+    line_move_sprite.rect.y = 100
+
+    icon_jim_sprite = pygame.sprite.Sprite()
+    icon_jim_sprite.image = load_image('icon_jim.png')
+    icon_jim_sprite.rect = icon_jim_sprite.image.get_rect()
+    icon_jim_sprites.add(icon_jim_sprite)
+    icon_jim_sprite.rect.x = 30
+    icon_jim_sprite.rect.y = 600
+
     background_image = load_image('background.png')
 
     startTime = time.time()
     lastTime = startTime
 
+
     def drawWindow():
         global can_move
+        global step
         x_rel = x_pos % width
         x_part2 = x_rel - width if x_rel > 0 else x_rel + width
         screen.blit(background_image, (x_rel, 0))
@@ -174,6 +194,7 @@ if __name__ == '__main__':
             tunnel_sprites_part2.draw(screen)
         else:
             can_move = False
+            pygame.mixer.music.pause()
 
             screen.blit(background_image, (0, 0))
 
@@ -192,6 +213,11 @@ if __name__ == '__main__':
                 planet_sprite.rect.y = 710 - sr_zn
 
             planet_sprites.draw(screen)
+        icon_jim_sprite.rect.y = icon_jim_sprite.rect.y - 0.8125
+        print(icon_jim_sprite.rect.y)
+        icon_jim_sprites.draw(screen)
+
+        line_move_sprites.draw(screen)
 
         all_sprites.update()
         all_sprites.draw(screen)
