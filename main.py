@@ -18,8 +18,12 @@ if __name__ == '__main__':
     frames_per_second = 8
     clock = pygame.time.Clock()
     can_move = True
+    counter_bubbles = 9
     pygame.mixer.music.load('data/background_sound.mp3')
+    pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play()
+    sound_race_won = pygame.mixer.Sound('data/race_won.mp3')
+    sound_race_lost = pygame.mixer.Sound('data/race_lost.mp3')
     background_sprites = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
     tunnel_sprites_part1 = pygame.sprite.Group()
@@ -28,6 +32,8 @@ if __name__ == '__main__':
     planet_sprites = pygame.sprite.Group()
     line_move_sprites = pygame.sprite.Group()
     icon_jim_sprites = pygame.sprite.Group()
+    race_won_sprites = pygame.sprite.Group()
+    race_lost_sprites = pygame.sprite.Group()
 
 
     def load_image(name, colorkey=None):
@@ -117,6 +123,7 @@ if __name__ == '__main__':
             self.cur_frame = int((time.time() - start_frame) * 30 % 8)
             self.image = self.frames[self.cur_frame]
 
+
     class AsteroidCollision(pygame.sprite.Sprite):
         def __init__(self, sheet, columns, rows, x, y):
             super().__init__(asteroids_collision_sprites)
@@ -137,6 +144,52 @@ if __name__ == '__main__':
 
         def update(self):
             self.cur_frame = int((time.time() - start_frame) * frames_per_second % noi)
+            self.image = self.frames[self.cur_frame]
+
+
+    class AnimateRaceWon(pygame.sprite.Sprite):
+        def __init__(self, sheet, columns, rows, x, y):
+            super().__init__(race_won_sprites)
+            self.frames = []
+            self.cut_sheet(sheet, columns, rows)
+            self.cur_frame = 0
+            self.image = self.frames[self.cur_frame]
+            self.rect = self.rect.move(x, y)
+
+        def cut_sheet(self, sheet, columns, rows):
+            self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                    sheet.get_height() // rows)
+            for j in range(rows):
+                for i in range(columns):
+                    frame_location = (self.rect.w * i, self.rect.h * j)
+                    self.frames.append(sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size)))
+
+        def update(self):
+            self.cur_frame = int((time.time() - start_frame) * 7 % 7)
+            self.image = self.frames[self.cur_frame]
+
+
+    class AnimateRaceLost(pygame.sprite.Sprite):
+        def __init__(self, sheet, columns, rows, x, y):
+            super().__init__(race_lost_sprites)
+            self.frames = []
+            self.cut_sheet(sheet, columns, rows)
+            self.cur_frame = 0
+            self.image = self.frames[self.cur_frame]
+            self.rect = self.rect.move(x, y)
+
+        def cut_sheet(self, sheet, columns, rows):
+            self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                    sheet.get_height() // rows)
+            for j in range(rows):
+                for i in range(columns):
+                    frame_location = (self.rect.w * i, self.rect.h * j)
+                    self.frames.append(sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size)))
+
+        def update(self):
+            self.cur_frame = int((time.time() - start_frame) * 7 % 9)
             self.image = self.frames[self.cur_frame]
 
     jim_sprites = AnimatedSprite(load_image("jim_sprites.png"), 4, 1, 0, 0)
@@ -170,7 +223,15 @@ if __name__ == '__main__':
     icon_jim_sprite.rect = icon_jim_sprite.image.get_rect()
     icon_jim_sprites.add(icon_jim_sprite)
     icon_jim_sprite.rect.x = 30
-    icon_jim_sprite.rect.y = 600
+    icon_jim_sprite.rect.y = 650
+
+    race_won_sprite = AnimateRaceWon(load_image("race_won.png"), 7, 1, 0, 0)
+    race_won_sprite.rect.x = 1280
+    race_won_sprite.rect.y = -10
+
+    race_lost_sprite = AnimateRaceLost(load_image("race_lost.png"), 9, 1, 0, 0)
+    race_lost_sprite.rect.x = 1280
+    race_lost_sprite.rect.y = -10
 
     background_image = load_image('background.png')
 
@@ -180,7 +241,8 @@ if __name__ == '__main__':
 
     def drawWindow():
         global can_move
-        global step
+        global counter_bubbles
+
         x_rel = x_pos % width
         x_part2 = x_rel - width if x_rel > 0 else x_rel + width
         screen.blit(background_image, (x_rel, 0))
@@ -192,29 +254,43 @@ if __name__ == '__main__':
         elif float('%s' % (totalTime)) > 60.01 and float('%s' % (totalTime)) < 65.01:
             tunnel_sprites_part2.update()
             tunnel_sprites_part2.draw(screen)
-        else:
+        elif float('%s' % (totalTime)) > 65.01:
             can_move = False
-            pygame.mixer.music.pause()
 
             screen.blit(background_image, (0, 0))
 
-            jim_sprites.rect.x += 6
+            jim_sprites.rect.x += 8
             jim_sprites.rect.y -= 6
 
-            size_x = 75
+            size_x = 100
             size_y = 53
             sr_zn = (jim_sprites.rect.x - jim_sprites.rect.y) // 3
-
             planet_sprite.rect.w = 100 if planet_sprite.rect.y == 0 else planet_sprite.rect.w
-
             if planet_sprite.rect.w < 400:
                 planet_sprite.image = pygame.transform.scale(load_image('planet.png'), (size_x + sr_zn, size_y + sr_zn))
                 planet_sprite.rect = planet_sprite.image.get_rect()
                 planet_sprite.rect.y = 710 - sr_zn
-
+            print(planet_sprite.rect.x, planet_sprite.rect.y)
             planet_sprites.draw(screen)
-        icon_jim_sprite.rect.y = icon_jim_sprite.rect.y - 0.8125
-        print(icon_jim_sprite.rect.y)
+            print(jim_sprites.rect.x)
+            if jim_sprites.rect.x > 1700 and counter_bubbles >= 10:
+                pygame.mixer.music.pause()
+                sound_race_won.play()
+                race_won_sprite.rect.x -= 4
+                race_won_sprite.rect.y += 3
+                race_won_sprites.update()
+                race_won_sprites.draw(screen)
+            elif jim_sprites.rect.x > 1700 and counter_bubbles < 10:
+                pygame.mixer.music.pause()
+                sound_race_lost.play()
+                race_lost_sprite.rect.x -= 4
+                race_lost_sprite.rect.y += 3
+                race_lost_sprites.update()
+                race_lost_sprites.draw(screen)
+            if race_won_sprite.rect.y > 780 or race_lost_sprite.rect.y > 780:
+                sound_race_won.stop()
+                sound_race_lost.stop()
+
         icon_jim_sprites.draw(screen)
 
         line_move_sprites.draw(screen)
