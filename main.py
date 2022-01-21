@@ -34,6 +34,7 @@ if __name__ == '__main__':
     icon_jim_sprites = pygame.sprite.Group()
     race_won_sprites = pygame.sprite.Group()
     race_lost_sprites = pygame.sprite.Group()
+    bubbles_sprites = pygame.sprite.Group()
 
 
     def load_image(name, colorkey=None):
@@ -192,6 +193,29 @@ if __name__ == '__main__':
             self.cur_frame = int((time.time() - start_frame) * 7 % 9)
             self.image = self.frames[self.cur_frame]
 
+
+    class AnimateBubbles(pygame.sprite.Sprite):
+        def __init__(self, sheet, columns, rows, x, y):
+            super().__init__(bubbles_sprites)
+            self.frames = []
+            self.cut_sheet(sheet, columns, rows)
+            self.cur_frame = 0
+            self.image = self.frames[self.cur_frame]
+            self.rect = self.rect.move(x, y)
+
+        def cut_sheet(self, sheet, columns, rows):
+            self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                    sheet.get_height() // rows)
+            for j in range(rows):
+                for i in range(columns):
+                    frame_location = (self.rect.w * i, self.rect.h * j)
+                    self.frames.append(sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size)))
+
+        def update(self):
+            self.cur_frame = int((time.time() - start_frame) * 7 % 9)
+            self.image = self.frames[self.cur_frame]
+
     jim_sprites = AnimatedSprite(load_image("jim_sprites.png"), 4, 1, 0, 0)
     jim_sprites.rect.x = 640
     jim_sprites.rect.y = 500
@@ -233,6 +257,8 @@ if __name__ == '__main__':
     race_lost_sprite.rect.x = 1280
     race_lost_sprite.rect.y = -10
 
+    bubble_sprite = AnimateBubbles(load_image('bubbles.png'), 16, 1, 640, 380)
+
     background_image = load_image('background.png')
 
     startTime = time.time()
@@ -251,6 +277,9 @@ if __name__ == '__main__':
         if float('%s' % (totalTime)) < 60.01:
             tunnel_sprites_part1.update()
             tunnel_sprites_part1.draw(screen)
+
+            bubbles_sprites.update()
+            bubbles_sprites.draw(screen)
         elif float('%s' % (totalTime)) > 60.01 and float('%s' % (totalTime)) < 65.01:
             tunnel_sprites_part2.update()
             tunnel_sprites_part2.draw(screen)
