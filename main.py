@@ -378,6 +378,56 @@ if __name__ == '__main__':
     pause_text = pygame.font.SysFont('Consolas', 32).render('Pause', True, pygame.color.Color('White'))
 
 
+    def drawIntro():
+        img_fon = pygame.image.load('data/intro_back.png')
+        font = pygame.font.SysFont("calibri", 35)
+        text_welcome = font.render("Создатели: ", True, (180, 180, 180))
+        text_welcome2 = font.render("Александр Харченко и Сергеев Илья", True, (180, 180, 180))
+        button = font.render('Далее', True, (255, 0, 0))
+        width_rect, height_rect = 100, 45
+        rect = pygame.Rect(875, 635, width_rect, height_rect)
+        pygame.draw.rect(screen, pygame.Color("BLACK"), rect)
+        running_fon = True
+        while running_fon:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                   pygame.quit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if rect.collidepoint(event.pos):
+                        running_fon = False
+
+            screen.blit(pygame.transform.scale(img_fon, [1280, 760]), [0, 0])
+            screen.blit(text_welcome, [850, 560])
+            screen.blit(text_welcome2, [700, 600])
+            screen.blit(button, [880, 640])
+            if not running_fon:
+                screen.fill(0)
+            pygame.display.update()
+
+
+    def drawHistory():
+        font = pygame.font.SysFont("calibri", 24)
+        text = font.render("История игры", True, (180, 180, 180))
+        text_play = font.render("Начать игру", True, (255, 0, 0))
+        width_rect, height_rect = 125, 30
+        rect = pygame.Rect(1280 / 2 - 50, 650, width_rect, height_rect)
+        pygame.draw.rect(screen, pygame.Color("BLACK"), rect)
+        running_fon = True
+        while running_fon:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                   pygame.quit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if rect.collidepoint(event.pos):
+                        running_fon = False
+
+            screen.blit(text, [1280 / 2 - 50, 760 / 2])
+            screen.blit(text_play, [1280 / 2 - 50, 650])
+            if not running_fon:
+                screen.fill(0)
+            pygame.display.update()
+
+
     def drawWindow():
         global can_move
         global counter_bubbles
@@ -441,6 +491,8 @@ if __name__ == '__main__':
         all_sprites.update()
         all_sprites.draw(screen)
 
+    drawIntro()
+    drawHistory()
 
     while running:
         for event in pygame.event.get():
