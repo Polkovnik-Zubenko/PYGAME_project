@@ -23,7 +23,6 @@ if __name__ == '__main__':
     state = True
     time_now = 0
     pygame.mixer.music.load('data/background_sound.mp3')
-    pygame.mixer.music.play()
     sound_race_won = pygame.mixer.Sound('data/race_won.mp3')
     sound_race_lost = pygame.mixer.Sound('data/race_lost.mp3')
     background_sprites = pygame.sprite.Group()
@@ -340,6 +339,55 @@ if __name__ == '__main__':
             self.image = self.frames[self.cur_frame]
 
 
+    def drawIntro():
+        img_fon = pygame.image.load('data/intro_back.png')
+        font = pygame.font.SysFont("calibri", 35)
+        text_welcome = font.render("Создатели: ", True, (180, 180, 180))
+        text_welcome2 = font.render("Александр Харченко и Сергеев Илья", True, (180, 180, 180))
+        button = font.render('Далее', True, (255, 0, 0))
+        width_rect, height_rect = 100, 45
+        rect = pygame.Rect(875, 635, width_rect, height_rect)
+        pygame.draw.rect(screen, pygame.Color("BLACK"), rect)
+        running_fon = True
+        while running_fon:
+            for action in pygame.event.get():
+                if action.type == pygame.QUIT:
+                    pygame.quit()
+                if action.type == pygame.MOUSEBUTTONDOWN:
+                    if rect.collidepoint(action.pos):
+                        running_fon = False
+
+            screen.blit(pygame.transform.scale(img_fon, [1280, 760]), [0, 0])
+            screen.blit(text_welcome, [850, 560])
+            screen.blit(text_welcome2, [700, 600])
+            screen.blit(button, [880, 640])
+            if not running_fon:
+                screen.fill(0)
+            pygame.display.update()
+
+    def drawHistory():
+        font = pygame.font.SysFont("calibri", 24)
+        text = font.render("История игры", True, (180, 180, 180))
+        text_play = font.render("Начать игру", True, (255, 0, 0))
+        width_rect, height_rect = 125, 30
+        rect = pygame.Rect(1280 / 2 - 50, 650, width_rect, height_rect)
+        pygame.draw.rect(screen, pygame.Color("BLACK"), rect)
+        running_fon = True
+        while running_fon:
+            for action2 in pygame.event.get():
+                if action2.type == pygame.QUIT:
+                    pygame.quit()
+                if action2.type == pygame.MOUSEBUTTONDOWN:
+                    if rect.collidepoint(action2.pos):
+                        running_fon = False
+
+            screen.blit(text, [1280 / 2 - 50, 760 / 2])
+            screen.blit(text_play, [1280 / 2 - 50, 650])
+            if not running_fon:
+                screen.fill(0)
+            pygame.display.update()
+
+
     jim_sprites = AnimatedSprite(load_image("jim_sprites.png"), 4, 1, 0, 0)
     jim_sprites.rect.x = 590
     jim_sprites.rect.y = 500
@@ -378,56 +426,6 @@ if __name__ == '__main__':
     pause_text = pygame.font.SysFont('Consolas', 32).render('Pause', True, pygame.color.Color('White'))
 
 
-    def drawIntro():
-        img_fon = pygame.image.load('data/intro_back.png')
-        font = pygame.font.SysFont("calibri", 35)
-        text_welcome = font.render("Создатели: ", True, (180, 180, 180))
-        text_welcome2 = font.render("Александр Харченко и Сергеев Илья", True, (180, 180, 180))
-        button = font.render('Далее', True, (255, 0, 0))
-        width_rect, height_rect = 100, 45
-        rect = pygame.Rect(875, 635, width_rect, height_rect)
-        pygame.draw.rect(screen, pygame.Color("BLACK"), rect)
-        running_fon = True
-        while running_fon:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                   pygame.quit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if rect.collidepoint(event.pos):
-                        running_fon = False
-
-            screen.blit(pygame.transform.scale(img_fon, [1280, 760]), [0, 0])
-            screen.blit(text_welcome, [850, 560])
-            screen.blit(text_welcome2, [700, 600])
-            screen.blit(button, [880, 640])
-            if not running_fon:
-                screen.fill(0)
-            pygame.display.update()
-
-
-    def drawHistory():
-        font = pygame.font.SysFont("calibri", 24)
-        text = font.render("История игры", True, (180, 180, 180))
-        text_play = font.render("Начать игру", True, (255, 0, 0))
-        width_rect, height_rect = 125, 30
-        rect = pygame.Rect(1280 / 2 - 50, 650, width_rect, height_rect)
-        pygame.draw.rect(screen, pygame.Color("BLACK"), rect)
-        running_fon = True
-        while running_fon:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                   pygame.quit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if rect.collidepoint(event.pos):
-                        running_fon = False
-
-            screen.blit(text, [1280 / 2 - 50, 760 / 2])
-            screen.blit(text_play, [1280 / 2 - 50, 650])
-            if not running_fon:
-                screen.fill(0)
-            pygame.display.update()
-
-
     def drawWindow():
         global can_move
         global counter_bubbles
@@ -449,6 +447,7 @@ if __name__ == '__main__':
         elif time_now > time_const and time_now < time_const + 5:
             tunnel_sprites_part2.update()
             tunnel_sprites_part2.draw(screen)
+
         elif time_now > time_const + 5:
             can_move = False
 
@@ -466,6 +465,7 @@ if __name__ == '__main__':
                 planet_sprite.rect = planet_sprite.image.get_rect()
                 planet_sprite.rect.y = 710 - sr_zn
             planet_sprites.draw(screen)
+
             if jim_sprites.rect.x > 1700 and counter_bubbles >= 10:
                 pygame.mixer.music.pause()
                 sound_race_won.play()
@@ -493,6 +493,7 @@ if __name__ == '__main__':
 
     drawIntro()
     drawHistory()
+    pygame.mixer.music.play()
 
     while running:
         for event in pygame.event.get():
@@ -507,7 +508,6 @@ if __name__ == '__main__':
         totalTime = round(time.time() - startTime, 2)
         if state:
             clock.tick(fps)
-
             drawWindow()
             if can_move:
                 keys = pygame.key.get_pressed()
