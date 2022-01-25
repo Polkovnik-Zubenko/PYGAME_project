@@ -4,6 +4,7 @@ import os
 import sys
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
+import time
 
 if __name__ == '__main__':
     pygame.init()
@@ -387,6 +388,23 @@ if __name__ == '__main__':
                 screen.fill(0)
             pygame.display.update()
 
+    def end_game():
+        anim_png = [pygame.image.load('data/cadr.png'), pygame.image.load('data/cadr1.png'),
+                    pygame.image.load('data/cadr2.png'), pygame.image.load('data/cadr4.png'),
+                    pygame.image.load('data/cadr5.png'), pygame.image.load('data/cadr6.png')]
+
+        running_fon = True
+        while running_fon:
+            for action2 in pygame.event.get():
+                if action2.type == pygame.QUIT:
+                    pygame.quit()
+            for img in anim_png:
+                screen.fill(0)
+                screen.blit(pygame.transform.scale(img, [150, 300]), [1280 / 2 - 100, 25])
+                pygame.display.update()
+                time.sleep(0.25)
+            pygame.display.update()
+
 
     jim_sprites = AnimatedSprite(load_image("jim_sprites.png"), 4, 1, 0, 0)
     jim_sprites.rect.x = 590
@@ -493,6 +511,7 @@ if __name__ == '__main__':
 
     drawIntro()
     drawHistory()
+    end_game()
     pygame.mixer.music.play()
 
     while running:
