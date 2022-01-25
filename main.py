@@ -353,7 +353,7 @@ if __name__ == '__main__':
         while running_fon:
             for action in pygame.event.get():
                 if action.type == pygame.QUIT:
-                    pygame.quit()
+                    sys.exit(0)
                 if action.type == pygame.MOUSEBUTTONDOWN:
                     if rect.collidepoint(action.pos):
                         running_fon = False
@@ -377,7 +377,7 @@ if __name__ == '__main__':
         while running_fon:
             for action2 in pygame.event.get():
                 if action2.type == pygame.QUIT:
-                    pygame.quit()
+                    sys.exit(0)
                 if action2.type == pygame.MOUSEBUTTONDOWN:
                     if rect.collidepoint(action2.pos):
                         running_fon = False
@@ -393,14 +393,20 @@ if __name__ == '__main__':
                     pygame.image.load('data/cadr2.png'), pygame.image.load('data/cadr4.png'),
                     pygame.image.load('data/cadr5.png'), pygame.image.load('data/cadr6.png')]
 
+        groovy_img = pygame.image.load('data/groovy.png')
+
+        end = pygame.mixer.Sound('data/end.wav')
+        end.play()
+
         running_fon = True
         while running_fon:
             for action2 in pygame.event.get():
                 if action2.type == pygame.QUIT:
-                    pygame.quit()
+                    sys.exit(0)
             for img in anim_png:
-                screen.fill(0)
-                screen.blit(pygame.transform.scale(img, [150, 300]), [1280 / 2 - 100, 25])
+                screen.fill((255, 255, 255))
+                screen.blit(pygame.transform.scale(img, [200, 350]), [1280 / 2 - 150, 25])
+                screen.blit(pygame.transform.scale(groovy_img, [250, 100]), [1280 / 2 - 150, 150 + 300])
                 pygame.display.update()
                 time.sleep(0.25)
             pygame.display.update()
