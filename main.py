@@ -1,9 +1,8 @@
+import random
 import time
 import pygame
 import os
 import sys
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow
 
 if __name__ == '__main__':
     pygame.init()
@@ -22,7 +21,10 @@ if __name__ == '__main__':
     counter_bubbles = 9
     state = True
     time_now = 0
+    pause_start = 0
+    pause_time = 0
     pygame.mixer.music.load('data/background_sound.mp3')
+    sound_bubble = pygame.mixer.Sound('data/bubble_sound.mp3')
     sound_race_won = pygame.mixer.Sound('data/race_won.mp3')
     sound_race_lost = pygame.mixer.Sound('data/race_lost.mp3')
     background_sprites = pygame.sprite.Group()
@@ -36,96 +38,6 @@ if __name__ == '__main__':
     race_won_sprites = pygame.sprite.Group()
     race_lost_sprites = pygame.sprite.Group()
     bubbles_sprites = pygame.sprite.Group()
-
-
-    class Ui_MainWindow(object):
-        def setupUi(self, MainWindow):
-            MainWindow.setObjectName("MainWindow")
-            MainWindow.resize(640, 428)
-            self.centralwidget = QtWidgets.QWidget(MainWindow)
-            self.centralwidget.setObjectName("centralwidget")
-            self.horizontalSlider = QtWidgets.QSlider(self.centralwidget)
-            self.horizontalSlider.setGeometry(QtCore.QRect(140, 140, 331, 22))
-            self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
-            self.horizontalSlider.setObjectName("horizontalSlider")
-            self.label = QtWidgets.QLabel(self.centralwidget)
-            self.label.setGeometry(QtCore.QRect(260, 100, 131, 16))
-            self.label.setObjectName("label")
-            self.label_2 = QtWidgets.QLabel(self.centralwidget)
-            self.label_2.setGeometry(QtCore.QRect(100, 140, 31, 16))
-            self.label_2.setObjectName("label_2")
-            self.label_3 = QtWidgets.QLabel(self.centralwidget)
-            self.label_3.setGeometry(QtCore.QRect(480, 140, 55, 16))
-            self.label_3.setObjectName("label_3")
-            self.label_5 = QtWidgets.QLabel(self.centralwidget)
-            self.label_5.setGeometry(QtCore.QRect(260, 210, 131, 16))
-            self.label_5.setObjectName("label_5")
-            self.horizontalSlider_2 = QtWidgets.QSlider(self.centralwidget)
-            self.horizontalSlider_2.setGeometry(QtCore.QRect(140, 250, 331, 22))
-            self.horizontalSlider_2.setOrientation(QtCore.Qt.Horizontal)
-            self.horizontalSlider_2.setObjectName("horizontalSlider_2")
-            self.label_6 = QtWidgets.QLabel(self.centralwidget)
-            self.label_6.setGeometry(QtCore.QRect(100, 250, 31, 16))
-            self.label_6.setObjectName("label_6")
-            self.label_7 = QtWidgets.QLabel(self.centralwidget)
-            self.label_7.setGeometry(QtCore.QRect(480, 250, 55, 16))
-            self.label_7.setObjectName("label_7")
-            self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-            self.pushButton.setGeometry(QtCore.QRect(270, 320, 141, 41))
-            self.pushButton.setObjectName("pushButton")
-            MainWindow.setCentralWidget(self.centralwidget)
-            self.menubar = QtWidgets.QMenuBar(MainWindow)
-            self.menubar.setGeometry(QtCore.QRect(0, 0, 640, 26))
-            self.menubar.setObjectName("menubar")
-            MainWindow.setMenuBar(self.menubar)
-            self.statusbar = QtWidgets.QStatusBar(MainWindow)
-            self.statusbar.setObjectName("statusbar")
-            MainWindow.setStatusBar(self.statusbar)
-
-            self.retranslateUi(MainWindow)
-            QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-        def retranslateUi(self, MainWindow):
-            _translate = QtCore.QCoreApplication.translate
-            MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-            self.label.setText(_translate("MainWindow", "VOLUME MAIN MUSIC"))
-            self.label_2.setText(_translate("MainWindow", "MIN"))
-            self.label_3.setText(_translate("MainWindow", "MAX"))
-            self.label_5.setText(_translate("MainWindow", "VOLUME SOUNDS"))
-            self.label_6.setText(_translate("MainWindow", "MIN"))
-            self.label_7.setText(_translate("MainWindow", "MAX"))
-            self.pushButton.setText(_translate("MainWindow", "PushButton"))
-
-
-    class MyWidget(QMainWindow, Ui_MainWindow):
-        def __init__(self, vSl=100):
-            super().__init__()
-            self.setupUi(self)
-            self.setWindowTitle('Settings')
-            self.pushButton.setText('Вернуться в игру')
-            self.horizontalSlider.setMinimum(0)
-            self.horizontalSlider.setMaximum(100)
-            self.horizontalSlider.setValue(vSl)
-            self.horizontalSlider.valueChanged[int].connect(self.slaider)
-            self.horizontalSlider_2.setMinimum(0)
-            self.horizontalSlider_2.setMaximum(100)
-            self.horizontalSlider_2.setValue(vSl)
-            self.horizontalSlider_2.valueChanged[int].connect(self.slaider2)
-            self.pushButton.clicked.connect(self.closewindow)
-
-        def slaider(self, value1):
-            pygame.mixer.music.set_volume(value1 * 0.01)
-
-        def slaider2(self, value2):
-            sound_race_won.set_volume(value2 * 0.01)
-            sound_race_lost.set_volume(value2 * 0.01)
-
-        def closewindow(self):
-            global state
-
-            self.destroy()
-            state = True
-
 
     def load_image(name, colorkey=None):
         fullname = os.path.join('data', name)
@@ -150,6 +62,7 @@ if __name__ == '__main__':
             self.cut_sheet(sheet, columns, rows)
             self.cur_frame = 0
             self.image = self.frames[self.cur_frame]
+            self.mask = pygame.mask.from_surface(self.image)
             self.rect = self.rect.move(x, y)
 
         def cut_sheet(self, sheet, columns, rows):
@@ -317,30 +230,23 @@ if __name__ == '__main__':
 
 
     class AnimateBubbles(pygame.sprite.Sprite):
-        def __init__(self, sheet, columns, rows, x, y):
+        def __init__(self, x, y):
             super().__init__(bubbles_sprites)
-            self.frames = []
-            self.cut_sheet(sheet, columns, rows)
-            self.cur_frame = 0
-            self.image = self.frames[self.cur_frame]
+            self.image = load_image('bubble.png')
+            self.image = pygame.transform.scale(self.image, (20, 20))
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
             self.rect = self.rect.move(x, y)
-
-        def cut_sheet(self, sheet, columns, rows):
-            self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                    sheet.get_height() // rows)
-            for j in range(rows):
-                for i in range(columns):
-                    frame_location = (self.rect.w * i, self.rect.h * j)
-                    self.frames.append(sheet.subsurface(pygame.Rect(
-                        frame_location, self.rect.size)))
+            self.size_x_bubble = 20
+            self.size_y_bubble = 20
 
         def update(self):
-            self.cur_frame = int((time.time() - start_frame) * 7 % 9)
-            self.image = self.frames[self.cur_frame]
-
+            self.size_x_bubble += 1
+            self.size_y_bubble += 1
+            self.image = pygame.transform.scale(self.image, (self.size_x_bubble, self.size_y_bubble))
 
     def drawIntro():
-        img_fon = pygame.image.load('data/intro_back.png')
+        img_fon = pygame.image.load('data/1.png')
         font = pygame.font.SysFont("calibri", 35)
         text_welcome = font.render("Создатели: ", True, (180, 180, 180))
         text_welcome2 = font.render("Александр Харченко и Сергеев Илья", True, (180, 180, 180))
@@ -366,6 +272,8 @@ if __name__ == '__main__':
             pygame.display.update()
 
     def drawHistory():
+        global pause_time, pause_start
+
         font = pygame.font.SysFont("calibri", 24)
         text = font.render("История игры", True, (180, 180, 180))
         text_play = font.render("Начать игру", True, (255, 0, 0))
@@ -380,6 +288,7 @@ if __name__ == '__main__':
                 if action2.type == pygame.MOUSEBUTTONDOWN:
                     if rect.collidepoint(action2.pos):
                         running_fon = False
+                        pause_time = 0
 
             screen.blit(text, [1280 / 2 - 50, 760 / 2])
             screen.blit(text_play, [1280 / 2 - 50, 650])
@@ -416,7 +325,10 @@ if __name__ == '__main__':
     race_lost_sprite.rect.x = 1280
     race_lost_sprite.rect.y = -10
 
-    bubble_sprite = AnimateBubbles(load_image('bubbles.png'), 16, 1, 640, 380)
+    bubble_sprite = AnimateBubbles(520, 230)
+    bubble_flag = True
+    for _ in range(17):
+        bubble_sprite = AnimateBubbles(520, 230)
 
     background_image = load_image('background.png')
 
@@ -430,19 +342,38 @@ if __name__ == '__main__':
         global can_move
         global counter_bubbles
         global time_now
+        global bubble_flag
 
         x_rel = x_pos % width
         x_part2 = x_rel - width if x_rel > 0 else x_rel + width
         screen.blit(background_image, (x_rel, 0))
         screen.blit(background_image, (x_part2, 0))
 
-        time_now = float('%s' % (totalTime))
+        time_now = float('%s' % (totalTime)) - pause_time
         time_const = 63.01
-        print(time_now)
 
         if time_now < time_const:
             tunnel_sprites_part1.update()
             tunnel_sprites_part1.draw(screen)
+
+            if pygame.sprite.collide_mask(bubble_sprite, jim_sprites):
+                sound_bubble.play()
+                counter_bubbles += 1
+                bubble_sprite.rect.y = 1000
+                bubble_flag = False
+            else:
+                if bubble_flag:
+                    rand_choice = random.randint(1, 2)
+                    if rand_choice == 1:
+                        rand = random.randint(-5, 1)
+                        bubble_sprite.rect.x += rand
+                        bubble_sprite.rect.y += 2
+                    elif rand_choice == 2:
+                        rand1 = random.randint(-1, 5)
+                        bubble_sprite.rect.x += rand1
+                        bubble_sprite.rect.y += 2
+                    bubbles_sprites.update()
+                    bubbles_sprites.draw(screen)
 
         elif time_now > time_const and time_now < time_const + 5:
             tunnel_sprites_part2.update()
@@ -481,6 +412,7 @@ if __name__ == '__main__':
                 race_lost_sprites.update()
                 race_lost_sprites.draw(screen)
             if race_won_sprite.rect.y > 780 or race_lost_sprite.rect.y > 780:
+                pass
                 sound_race_won.stop()
                 sound_race_lost.stop()
         icon_jim_sprites.update()
@@ -504,23 +436,28 @@ if __name__ == '__main__':
                     state = False
                 if event.key == pygame.K_SPACE:
                     state = True
+                    pause_time += time.time() - pause_start
         lapTime = round(time.time() - lastTime, 2)
         totalTime = round(time.time() - startTime, 2)
         if state:
             clock.tick(fps)
+
+            radius_of_orbit = 340
+            delta_x = 640
+            delta_y = 845
+
             drawWindow()
             if can_move:
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_d]:
                     jim_sprites.rect.x = jim_sprites.rect.x + 5
+                    jim_sprites.rect.y = -((jim_sprites.rect.x - delta_x) ** 2 + radius_of_orbit ** 2) ** 0.5 + delta_y
                 elif keys[pygame.K_a]:
                     jim_sprites.rect.x = jim_sprites.rect.x - 5
+                    jim_sprites.rect.y = -((jim_sprites.rect.x - delta_x) ** 2 + radius_of_orbit ** 2) ** 0.5 + delta_y
             x_pos += v / fps
         else:
             screen.blit(pause_text, (640, 330))
-            app = QApplication(sys.argv)
-            ex = MyWidget()
-            ex.show()
-            sys.exit(app.exec_())
+            pause_start = time.time()
         pygame.display.flip()
     pygame.quit()
