@@ -14,8 +14,6 @@ if __name__ == '__main__':
     v = 300
     fps = 60
     start_frame = time.time()
-    noi = 4
-    frames_per_second = 8
     clock = pygame.time.Clock()
     can_move = True
     counter_bubbles = 9
@@ -77,7 +75,7 @@ if __name__ == '__main__':
                         frame_location, self.rect.size)))
 
         def update(self):
-            self.cur_frame = int((time.time() - start_frame) * frames_per_second % noi)
+            self.cur_frame = int((time.time() - start_frame) * 8 % 4)
             self.image = self.frames[self.cur_frame]
 
 
@@ -149,7 +147,7 @@ if __name__ == '__main__':
                         frame_location, self.rect.size)))
 
         def update(self):
-            self.cur_frame = int((time.time() - start_frame) * frames_per_second % noi)
+            self.cur_frame = int((time.time() - start_frame) * 8 % 5)
             self.image = self.frames[self.cur_frame]
 
 
@@ -257,7 +255,7 @@ if __name__ == '__main__':
         def __init__(self, x, y):
             self.x = x
             self.y = y
-            super().__init__(bubbles_sprites)
+            super().__init__(asteroid_sprites)
             self.image = load_image('asteroid.png')
             self.image = pygame.transform.scale(self.image, (20, 20))
             self.rect = self.image.get_rect()
@@ -338,7 +336,8 @@ if __name__ == '__main__':
     tunnel_image_part2.set_alpha(170)
     tunnel_sprites_part2_ = AnimatedTunnelPart2(tunnel_image_part2, 4, 2, 0, 0)
 
-    asteroids_col_sprites = AsteroidCollision(load_image("asteroids_collision.png"), 6, 1, 0, 0)
+    asteroids_col_sprites = AsteroidCollision(load_image("asteroids_collision.png"), 6, 1, jim_sprites.rect.x,
+                                              jim_sprites.rect.y)
 
     planet_sprite = BigPlanet(0, 0)
 
@@ -357,6 +356,9 @@ if __name__ == '__main__':
     bubble_sprite = AnimateBubbles(520, 230)
     bubble_flag = True
 
+    asteroid_sprite = AnimateAsteroid(520, 230)
+    asteroid_flag = True
+
     background_image = load_image('background.png')
 
     startTime = time.time()
@@ -369,7 +371,7 @@ if __name__ == '__main__':
         global can_move
         global counter_bubbles
         global time_now
-        global bubble_flag
+        global bubble_flag, asteroid_flag
 
         x_rel = x_pos % width
         x_part2 = x_rel - width if x_rel > 0 else x_rel + width
@@ -383,24 +385,44 @@ if __name__ == '__main__':
             tunnel_sprites_part1.update()
             tunnel_sprites_part1.draw(screen)
 
-            if pygame.sprite.collide_mask(bubble_sprite, jim_sprites):
-                sound_bubble.play()
-                counter_bubbles += 1
-                bubble_sprite.rect.y = 1000
-                bubble_flag = False
+            # if pygame.sprite.collide_mask(bubble_sprite, jim_sprites):
+            #     sound_bubble.play()
+            #     counter_bubbles += 1
+            #     bubble_sprite.rect.y = 1000
+            #     bubble_flag = False
+            # else:
+            #     if bubble_flag:
+            #         rand1 = random.randint(1, 2)
+            #         if rand1 == 1:
+            #             rand = random.randint(-5, 1)
+            #             bubble_sprite.rect.x = bubble_sprite.rect.x + rand
+            #             bubble_sprite.rect.y += 2
+            #         elif rand1 == 2:
+            #             rand2 = random.randint(-1, 5)
+            #             bubble_sprite.rect.x += rand2
+            #             bubble_sprite.rect.y += 2
+            #         bubbles_sprites.update()
+            #         bubbles_sprites.draw(screen)
+
+            if pygame.sprite.collide_mask(asteroid_sprite, jim_sprites):
+                sound_asteroid.play()
+                asteroids_collision_sprites.update()
+                asteroids_collision_sprites.draw(screen)
+                asteroid_sprite.rect.y = 1000
+                asteroid_flag = False
             else:
-                if bubble_flag:
+                if asteroid_flag:
                     rand1 = random.randint(1, 2)
                     if rand1 == 1:
                         rand = random.randint(-5, 1)
-                        bubble_sprite.rect.x = bubble_sprite.rect.x + rand
-                        bubble_sprite.rect.y += 2
+                        asteroid_sprite.rect.x += rand
+                        asteroid_sprite.rect.y += 2
                     elif rand1 == 2:
                         rand2 = random.randint(-1, 5)
-                        bubble_sprite.rect.x += rand2
-                        bubble_sprite.rect.y += 2
-                    bubbles_sprites.update()
-                    bubbles_sprites.draw(screen)
+                        asteroid_sprite.rect.x += rand2
+                        asteroid_sprite.rect.y += 2
+                    asteroid_sprites.update()
+                    asteroid_sprites.draw(screen)
 
         elif not time_now <= time_const and time_now < time_const + 5:
             tunnel_sprites_part2.update()
