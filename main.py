@@ -12,7 +12,7 @@ if __name__ == '__main__':
     running = True
     x_pos = 0
     v = 300
-    fps = 30
+    fps = 60
     start_frame = time.time()
     noi = 4
     frames_per_second = 8
@@ -27,6 +27,7 @@ if __name__ == '__main__':
     sound_bubble = pygame.mixer.Sound('data/bubble_sound.mp3')
     sound_race_won = pygame.mixer.Sound('data/race_won.mp3')
     sound_race_lost = pygame.mixer.Sound('data/race_lost.mp3')
+    sound_asteroid = pygame.mixer.Sound('data/asteroid_sound.mp3')
     background_sprites = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
     tunnel_sprites_part1 = pygame.sprite.Group()
@@ -38,6 +39,7 @@ if __name__ == '__main__':
     race_won_sprites = pygame.sprite.Group()
     race_lost_sprites = pygame.sprite.Group()
     bubbles_sprites = pygame.sprite.Group()
+    asteroid_sprites = pygame.sprite.Group()
 
     def load_image(name, colorkey=None):
         fullname = os.path.join('data', name)
@@ -179,7 +181,7 @@ if __name__ == '__main__':
             if self.rect.y < 100:
                 self.rect.y = self.rect.y
             else:
-                self.y = self.y - 0.8125 / 3
+                self.y = self.y - 0.8125 / 6
                 self.rect.y = self.y
 
 
@@ -231,6 +233,8 @@ if __name__ == '__main__':
 
     class AnimateBubbles(pygame.sprite.Sprite):
         def __init__(self, x, y):
+            self.x = x
+            self.y = y
             super().__init__(bubbles_sprites)
             self.image = load_image('bubble.png')
             self.image = pygame.transform.scale(self.image, (20, 20))
@@ -244,8 +248,33 @@ if __name__ == '__main__':
             self.size_x_bubble += 1
             self.size_y_bubble += 1
             self.image = pygame.transform.scale(self.image, (self.size_x_bubble, self.size_y_bubble))
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect = self.rect.move(self.x, self.y)
 
-    def drawIntro():
+
+    class AnimateAsteroid(pygame.sprite.Sprite):
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+            super().__init__(bubbles_sprites)
+            self.image = load_image('asteroid.png')
+            self.image = pygame.transform.scale(self.image, (20, 20))
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect = self.rect.move(x, y)
+            self.size_x_bubble = 20
+            self.size_y_bubble = 20
+
+        def update(self):
+            self.size_x_bubble += 1
+            self.size_y_bubble += 1
+            self.image = pygame.transform.scale(self.image, (self.size_x_bubble, self.size_y_bubble))
+            self.rect = self.image.get_rect()
+            self.mask = pygame.mask.from_surface(self.image)
+            self.rect = self.rect.move(self.x, self.y)
+
+    def draw_intro():
         img_fon = pygame.image.load('data/1.png')
         font = pygame.font.SysFont("calibri", 35)
         text_welcome = font.render("Создатели: ", True, (180, 180, 180))
@@ -271,7 +300,7 @@ if __name__ == '__main__':
                 screen.fill(0)
             pygame.display.update()
 
-    def drawHistory():
+    def draw_history():
         global pause_time, pause_start
 
         font = pygame.font.SysFont("calibri", 24)
@@ -327,8 +356,6 @@ if __name__ == '__main__':
 
     bubble_sprite = AnimateBubbles(520, 230)
     bubble_flag = True
-    for _ in range(17):
-        bubble_sprite = AnimateBubbles(520, 230)
 
     background_image = load_image('background.png')
 
@@ -338,7 +365,7 @@ if __name__ == '__main__':
     pause_text = pygame.font.SysFont('Consolas', 32).render('Pause', True, pygame.color.Color('White'))
 
 
-    def drawWindow():
+    def draw_window():
         global can_move
         global counter_bubbles
         global time_now
@@ -349,8 +376,8 @@ if __name__ == '__main__':
         screen.blit(background_image, (x_rel, 0))
         screen.blit(background_image, (x_part2, 0))
 
-        time_now = float('%s' % (totalTime)) - pause_time
-        time_const = 63.01
+        time_now = float('%s' % totalTime) - pause_time
+        time_const = 64.01
 
         if time_now < time_const:
             tunnel_sprites_part1.update()
@@ -363,19 +390,19 @@ if __name__ == '__main__':
                 bubble_flag = False
             else:
                 if bubble_flag:
-                    rand_choice = random.randint(1, 2)
-                    if rand_choice == 1:
+                    rand1 = random.randint(1, 2)
+                    if rand1 == 1:
                         rand = random.randint(-5, 1)
-                        bubble_sprite.rect.x += rand
+                        bubble_sprite.rect.x = bubble_sprite.rect.x + rand
                         bubble_sprite.rect.y += 2
-                    elif rand_choice == 2:
-                        rand1 = random.randint(-1, 5)
-                        bubble_sprite.rect.x += rand1
+                    elif rand1 == 2:
+                        rand2 = random.randint(-1, 5)
+                        bubble_sprite.rect.x += rand2
                         bubble_sprite.rect.y += 2
                     bubbles_sprites.update()
                     bubbles_sprites.draw(screen)
 
-        elif time_now > time_const and time_now < time_const + 5:
+        elif not time_now <= time_const and time_now < time_const + 5:
             tunnel_sprites_part2.update()
             tunnel_sprites_part2.draw(screen)
 
@@ -384,8 +411,8 @@ if __name__ == '__main__':
 
             screen.blit(background_image, (0, 0))
 
-            jim_sprites.rect.x += 8
-            jim_sprites.rect.y -= 6
+            jim_sprites.rect.x += 4
+            jim_sprites.rect.y -= 3
 
             size_x = 100
             size_y = 53
@@ -400,19 +427,18 @@ if __name__ == '__main__':
             if jim_sprites.rect.x > 1700 and counter_bubbles >= 10:
                 pygame.mixer.music.pause()
                 sound_race_won.play()
-                race_won_sprite.rect.x -= 4
-                race_won_sprite.rect.y += 3
+                race_won_sprite.rect.x -= 3
+                race_won_sprite.rect.y += 2
                 race_won_sprites.update()
                 race_won_sprites.draw(screen)
             elif jim_sprites.rect.x > 1700 and counter_bubbles < 10:
                 pygame.mixer.music.pause()
                 sound_race_lost.play()
-                race_lost_sprite.rect.x -= 4
-                race_lost_sprite.rect.y += 3
+                race_lost_sprite.rect.x -= 3
+                race_lost_sprite.rect.y += 2
                 race_lost_sprites.update()
                 race_lost_sprites.draw(screen)
             if race_won_sprite.rect.y > 780 or race_lost_sprite.rect.y > 780:
-                pass
                 sound_race_won.stop()
                 sound_race_lost.stop()
         icon_jim_sprites.update()
@@ -423,8 +449,8 @@ if __name__ == '__main__':
         all_sprites.update()
         all_sprites.draw(screen)
 
-    drawIntro()
-    drawHistory()
+    draw_intro()
+    draw_history()
     pygame.mixer.music.play()
 
     while running:
@@ -446,7 +472,7 @@ if __name__ == '__main__':
             delta_x = 640
             delta_y = 845
 
-            drawWindow()
+            draw_window()
             if can_move:
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_d]:
