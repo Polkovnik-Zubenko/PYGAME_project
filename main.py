@@ -37,6 +37,7 @@ if __name__ == '__main__':
     race_won_sprites = pygame.sprite.Group()
     race_lost_sprites = pygame.sprite.Group()
     bubbles_sprites = pygame.sprite.Group()
+    end_sprites = pygame.sprite.Group()
 
 
     class Ui_MainWindow(object):
@@ -340,6 +341,29 @@ if __name__ == '__main__':
             self.image = self.frames[self.cur_frame]
 
 
+    class AnimateEndGame(pygame.sprite.Sprite):
+        def __init__(self, sheet, columns, rows, x, y):
+            super().__init__(end_sprites)
+            self.frames = []
+            self.cut_sheet(sheet, columns, rows)
+            self.cur_frame = 0
+            self.image = self.frames[self.cur_frame]
+            self.rect = self.rect.move(x, y)
+
+        def cut_sheet(self, sheet, columns, rows):
+            self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                    sheet.get_height() // rows)
+            for j in range(rows):
+                for i in range(columns):
+                    frame_location = (self.rect.w * i, self.rect.h * j)
+                    self.frames.append(sheet.subsurface(pygame.Rect(
+                        frame_location, self.rect.size)))
+
+        def update(self):
+            self.cur_frame = int((time.time() - start_frame) * 7 % 9)
+            self.image = self.frames[self.cur_frame]
+
+
     def drawIntro():
         img_fon = pygame.image.load('data/intro_back.png')
         font = pygame.font.SysFont("calibri", 35)
@@ -388,29 +412,6 @@ if __name__ == '__main__':
                 screen.fill(0)
             pygame.display.update()
 
-    def end_game():
-        anim_png = [pygame.image.load('data/cadr.png'), pygame.image.load('data/cadr1.png'),
-                    pygame.image.load('data/cadr2.png'), pygame.image.load('data/cadr4.png'),
-                    pygame.image.load('data/cadr5.png'), pygame.image.load('data/cadr6.png')]
-
-        groovy_img = pygame.image.load('data/groovy.png')
-
-        end = pygame.mixer.Sound('data/end.wav')
-        end.play()
-
-        running_fon = True
-        while running_fon:
-            for action2 in pygame.event.get():
-                if action2.type == pygame.QUIT:
-                    sys.exit(0)
-            for img in anim_png:
-                screen.fill((255, 255, 255))
-                screen.blit(pygame.transform.scale(img, [200, 350]), [1280 / 2 - 150, 25])
-                screen.blit(pygame.transform.scale(groovy_img, [250, 100]), [1280 / 2 - 150, 150 + 300])
-                pygame.display.update()
-                time.sleep(0.25)
-            pygame.display.update()
-
 
     jim_sprites = AnimatedSprite(load_image("jim_sprites.png"), 4, 1, 0, 0)
     jim_sprites.rect.x = 590
@@ -441,6 +442,8 @@ if __name__ == '__main__':
     race_lost_sprite.rect.y = -10
 
     bubble_sprite = AnimateBubbles(load_image('bubbles.png'), 16, 1, 640, 380)
+
+    end_sprite = AnimateEndGame(load_image('end.jpg'), 5, 1, 0, 0)
 
     background_image = load_image('background.png')
 
@@ -517,8 +520,11 @@ if __name__ == '__main__':
 
     drawIntro()
     drawHistory()
-    end_game()
-    pygame.mixer.music.play()
+
+    run = True
+    while run:
+        end_sprites.update()
+        end_sprites.draw(screen)
 
     while running:
         for event in pygame.event.get():
