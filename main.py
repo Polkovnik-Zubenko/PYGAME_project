@@ -399,7 +399,7 @@ if __name__ == '__main__':
         end_text = font.render("Выйти из игры", True, (0, 0, 255))
         greet_text = font2.render("Благодарим вас за прохождение. "
                                  "Надеемся вы получили яркие впечатления от игры", True, (180, 180, 180))
-        rect2 = pygame.Rect(1280 / 2 - 100, 760 / 2 + 100, 180, 28)
+        rect2 = pygame.Rect(1280 / 2 - 90, 760 / 2 + 200, 180, 28)
         pygame.draw.rect(screen, pygame.Color("black"), rect2)
 
         running_fon = True
