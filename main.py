@@ -15,7 +15,7 @@ if __name__ == '__main__':
     fps = 60
     start_frame = time.time()
     clock = pygame.time.Clock()
-    counter_bubbles = 0
+    counter_bubbles = 18
     state = True
     time_now = 0
     pause_start = 0
@@ -356,6 +356,31 @@ if __name__ == '__main__':
                 screen.fill(0)
             pygame.display.update()
 
+    def end_game_func():
+        img = pygame.image.load('data/foto.png')
+        font = pygame.font.SysFont("calibri", 28)
+        font2 = pygame.font.SysFont("calibri", 28)
+        end_text = font.render("Выйти из игры", True, (0, 0, 255))
+        greet_text = font2.render("Благодарим вас за прохождение. "
+                                  "Надеемся вы получили наиболее яркие впечатления от игры!", True, (180, 180, 180))
+        rect2 = pygame.Rect(1280 / 2 - 90, 760 / 2 + 200, 180, 28)
+        pygame.draw.rect(screen, pygame.Color("black"), rect2)
+
+        running_fon = True
+        while running_fon:
+            for action2 in pygame.event.get():
+                if action2.type == pygame.QUIT:
+                    pygame.quit()
+                if action2.type == pygame.MOUSEBUTTONDOWN:
+                    if rect2.collidepoint(action2.pos):
+                        sys.exit(0)
+            screen.blit(greet_text, [150, 760 / 2 + 110])
+            screen.blit(end_text, [1280 / 2 - 90, 760 / 2 + 200])
+            screen.blit(pygame.transform.scale(img, [250, 370]), [1280 / 2 - 120, 50])
+            if not running_fon:
+                screen.fill(0)
+            pygame.display.update()
+
 
     tunnel_image_part1 = load_image('tunnel_part1.png')
     tunnel_image_part1.set_alpha(150)
@@ -510,9 +535,9 @@ if __name__ == '__main__':
                 elif win_or_lose_flag == 1:
                     screen.blit(lost_text, (400, 100))
                     screen.blit(lost_text2, (150, 134))
+                end_game_func()
 
         all_sprites.update()
-
 
     draw_intro()
     draw_history()
