@@ -396,7 +396,7 @@ if __name__ == '__main__':
         img = pygame.image.load('data/foto.png')
         font = pygame.font.SysFont("calibri", 28)
         font2 = pygame.font.SysFont("calibri", 28)
-        end_text = font.render("Выйти из игры", True, (180, 180, 180))
+        end_text = font.render("Выйти из игры", True, (0, 0, 255))
         greet_text = font2.render("Благодарим вас за прохождение. "
                                  "Надеемся вы получили яркие впечатления от игры", True, (180, 180, 180))
         rect2 = pygame.Rect(1280 / 2 - 100, 760 / 2 + 100, 180, 28)
