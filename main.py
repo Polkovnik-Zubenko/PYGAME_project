@@ -433,7 +433,7 @@ if __name__ == '__main__':
 
         time_now = float('%s' % totalTime) - pause_time
 
-        time_const = 62.01
+        time_const = 12.01
 
         if time_now < time_const:
             rand = random.randint(1, 10000)
