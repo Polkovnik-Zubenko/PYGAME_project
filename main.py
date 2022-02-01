@@ -552,7 +552,6 @@ if __name__ == '__main__':
         all_sprites.update()
         all_sprites.draw(screen)
 
-    end_game_func()
     draw_intro()
     draw_history()
     startTime = time.time()
