@@ -15,7 +15,7 @@ if __name__ == '__main__':
     fps = 60
     start_frame = time.time()
     clock = pygame.time.Clock()
-    counter_bubbles = 16
+    counter_bubbles = 0
     state = True
     time_now = 0
     pause_start = 0
@@ -26,7 +26,6 @@ if __name__ == '__main__':
     sound_race_won = pygame.mixer.Sound('data/race_won.mp3')
     sound_race_lost = pygame.mixer.Sound('data/race_lost.mp3')
     sound_asteroid = pygame.mixer.Sound('data/asteroid_sound.mp3')
-    sound_groovy = pygame.mixer.Sound('data/end.wav')
     all_sprites = pygame.sprite.Group()
     bubbles_sprites = pygame.sprite.Group()
     asteroid_sprites = pygame.sprite.Group()
@@ -223,7 +222,7 @@ if __name__ == '__main__':
             self.image = pygame.transform.scale(self.base_image, (self.size_x, self.size_y))
             self.rect = self.image.get_rect()
             self.mask = pygame.mask.from_surface(self.image)
-            self.rect = self.rect.move(x + random.randint(-5, 5), y + random.randint(0, 1))
+            self.rect = self.rect.move(x + random.randint(-5, 6), y + random.randint(0, 1))
 
 
     class BubbleSprite(BaseMovingSprite):
@@ -341,7 +340,6 @@ if __name__ == '__main__':
                         if rect.collidepoint(action2.pos):
                             running_fon = False
                             pause_time = 0
-
             screen.blit(text, [116, 124])
             screen.blit(text2, [116, 158])
             screen.blit(text3, [116, 192])
@@ -386,9 +384,6 @@ if __name__ == '__main__':
 
     background_image = load_image('background.png')
 
-    startTime = time.time()
-    lastTime = startTime
-
     pause_text = pygame.font.SysFont('Consolas', 32).render('Pause', True, pygame.color.Color('White'))
 
 
@@ -399,7 +394,7 @@ if __name__ == '__main__':
         bubble_img = pygame.image.load("data/bubble.png")
         text = font.render(f"{counter_bubbles} X ", True, (180, 180, 180))
         screen.blit(pygame.transform.scale(bubble_img, [50, 50]), [1220, 10])
-        screen.blit(text, [1170, 21])
+        screen.blit(text, [1155, 21])
         pygame.display.update()
 
 
@@ -417,11 +412,21 @@ if __name__ == '__main__':
 
         if time_now < time_const:
             rand = random.randint(1, 10000)
-            print(rand)
-            if rand in [i for i in range(9940, 10000)]:
-                BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
-            if rand in [i for i in range(9930, 10000)]:
-                AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
+            if difficult_flag == 1:
+                if rand in [i for i in range(9930, 10000)]:
+                    BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
+                if rand in [i for i in range(9940, 10000)]:
+                    AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
+            elif difficult_flag == 2:
+                if rand in [i for i in range(9940, 10000)]:
+                    BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
+                if rand in [i for i in range(9940, 10000)]:
+                    AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
+            elif difficult_flag == 3:
+                if rand in [i for i in range(9950, 10000)]:
+                    BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
+                if rand in [i for i in range(9930, 10000)]:
+                    AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
 
             for asteroid in asteroid_sprites:
                 if pygame.sprite.collide_mask(asteroid, jim_sprites):
@@ -462,44 +467,56 @@ if __name__ == '__main__':
             jim_sprites.ending_game()
 
             planet_sprite.transform(jim_sprites.get_coords())
-
+            won_text = pygame.font.SysFont('Consolas', 32).render(
+                'Вам удалось собрать нужное количество пузырьков кислорода!', True, pygame.color.Color('White'))
+            lost_text = pygame.font.SysFont('Consolas', 32).render('Увы, сегодня не ваш день. ', True,
+                                                                   pygame.color.Color('White'))
+            lost_text2 = pygame.font.SysFont('Consolas', 32).render(
+                'Наверное Джим уже больше никогда не вернется домой...', True, pygame.color.Color('White'))
+            win_or_lose_flag = 0
             if jim_sprites.get_coords()[0] > 1650:
                 pygame.mixer.music.pause()
-                if difficult_flag == 1 and counter_bubbles < 5:
-                    jim_sprites.end_game(counter_bubbles < 5)
+                if difficult_flag == 1 and counter_bubbles < 6:
+                    jim_sprites.end_game(counter_bubbles < 6)
                     sound_race_lost.play()
-                elif difficult_flag == 1 and counter_bubbles > 5:
-                    jim_sprites.end_game(counter_bubbles < 5)
+                    win_or_lose_flag = 1
+                elif difficult_flag == 1 and counter_bubbles > 6:
+                    jim_sprites.end_game(counter_bubbles < 6)
                     sound_race_won.play()
+                    win_or_lose_flag = 2
                 if difficult_flag == 2 and counter_bubbles < 10:
                     jim_sprites.end_game(counter_bubbles < 10)
                     sound_race_lost.play()
+                    win_or_lose_flag = 1
                 elif difficult_flag == 2 and counter_bubbles > 10:
                     jim_sprites.end_game(counter_bubbles < 10)
                     sound_race_won.play()
-                if difficult_flag == 3 and counter_bubbles < 15:
-                    jim_sprites.end_game(counter_bubbles < 15)
+                    win_or_lose_flag = 2
+                if difficult_flag == 3 and counter_bubbles < 13:
+                    jim_sprites.end_game(counter_bubbles < 13)
                     sound_race_lost.play()
-                elif difficult_flag == 3 and counter_bubbles > 15:
-                    jim_sprites.end_game(counter_bubbles < 15)
+                    win_or_lose_flag = 1
+                elif difficult_flag == 3 and counter_bubbles > 13:
+                    jim_sprites.end_game(counter_bubbles < 13)
                     sound_race_won.play()
+                    win_or_lose_flag = 2
 
             game_ending_sprites.update()
             game_ending_sprites.draw(screen)
 
             if jim_sprites.rect.y > 780:
-                sound_race_won.stop()
-                sound_race_lost.stop()
-                screen.fill((255, 255, 255))
-                end_sprites.update()
-                end_sprites.draw(screen)
-                sound_groovy.play()
+                if win_or_lose_flag == 2:
+                    screen.blit(won_text, (100, 100))
+                elif win_or_lose_flag == 1:
+                    screen.blit(lost_text, (400, 100))
+                    screen.blit(lost_text2, (150, 134))
 
         all_sprites.update()
 
 
     draw_intro()
     draw_history()
+    startTime = time.time()
     pygame.mixer.music.play()
 
     while running:
@@ -509,12 +526,12 @@ if __name__ == '__main__':
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     state = False
+                    pygame.mixer.music.stop()
                     pause_start = time.time()
                 if event.key == pygame.K_SPACE:
                     state = True
-                    pygame.mixer.music.play()
+                    pygame.mixer.music.unpause()
                     pause_time += time.time() - pause_start
-        lapTime = round(time.time() - lastTime, 2)
         totalTime = round(time.time() - startTime, 2)
         if state:
             clock.tick(fps)
@@ -528,6 +545,5 @@ if __name__ == '__main__':
             x_pos += v / fps
         else:
             screen.blit(pause_text, (640, 330))
-            pygame.mixer.music.stop()
         pygame.display.flip()
     pygame.quit()
