@@ -320,7 +320,7 @@ if __name__ == '__main__':
 
 
     def draw_intro():
-        img_fon = pygame.image.load('data/1.png')
+        # img_fon = pygame.image.load('data/1.png')
         font = pygame.font.SysFont("calibri", 35)
         text_welcome = font.render("Создатели: ", True, (180, 180, 180))
         text_welcome2 = font.render("Александр Харченко и Сергеев Илья", True, (180, 180, 180))
@@ -337,7 +337,7 @@ if __name__ == '__main__':
                     if rect.collidepoint(action.pos):
                         running_fon = False
 
-            screen.blit(pygame.transform.scale(img_fon, [1280, 760]), [0, 0])
+            # screen.blit(pygame.transform.scale(img_fon, [1280, 760]), [0, 0])
             screen.blit(text_welcome, [850, 560])
             screen.blit(text_welcome2, [700, 600])
             screen.blit(button, [880, 640])
@@ -386,6 +386,35 @@ if __name__ == '__main__':
             screen.blit(text6, [116, 294])
             screen.blit(text7, [116, 328])
             screen.blit(text_play, [1280 / 2 - 50, 650])
+            if not running_fon:
+                screen.fill(0)
+            pygame.display.update()
+
+
+    def end_game_func():
+        font = pygame.font.SysFont("calibri", 35)
+        end_text = font.render("Начать заново", True, (180, 180, 180))
+        restart_text = font.render("Выйти из игры", True, (180, 180, 180))
+        rect1 = pygame.Rect(1280 / 2 - 300, 760 / 2, 210, 35)
+        rect2 = pygame.Rect(1280 / 2 + 100, 760 / 2, 212, 35)
+        pygame.draw.rect(screen, pygame.Color("black"), rect1)
+        pygame.draw.rect(screen, pygame.Color("black"), rect2)
+
+        running_fon = True
+        while running_fon:
+            for action2 in pygame.event.get():
+                if action2.type == pygame.QUIT:
+                    pygame.quit()
+                if action2.type == pygame.MOUSEBUTTONDOWN:
+                    if rect2.collidepoint(action2.pos):
+                        sys.exit(0)
+                if action2.type == pygame.MOUSEBUTTONDOWN:
+                    if rect1.collidepoint(action2.pos):
+                        # какой то код
+                        pause_time = 0
+
+            screen.blit(end_text, [1280 / 2 - 300, 760 / 2])
+            screen.blit(restart_text, [1280 / 2 + 100, 760 / 2])
             if not running_fon:
                 screen.fill(0)
             pygame.display.update()
