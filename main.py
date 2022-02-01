@@ -4,6 +4,7 @@ import pygame
 import os
 import sys
 
+
 if __name__ == '__main__':
     pygame.init()
     pygame.display.set_caption('Earthworm Jim, Andy Asteroids')
@@ -392,12 +393,13 @@ if __name__ == '__main__':
 
 
     def end_game_func():
-        font = pygame.font.SysFont("calibri", 35)
-        end_text = font.render("Начать заново", True, (180, 180, 180))
-        restart_text = font.render("Выйти из игры", True, (180, 180, 180))
-        rect1 = pygame.Rect(1280 / 2 - 300, 760 / 2, 210, 35)
-        rect2 = pygame.Rect(1280 / 2 + 100, 760 / 2, 212, 35)
-        pygame.draw.rect(screen, pygame.Color("black"), rect1)
+        img = pygame.image.load('data/foto.png')
+        font = pygame.font.SysFont("calibri", 28)
+        font2 = pygame.font.SysFont("calibri", 28)
+        end_text = font.render("Выйти из игры", True, (180, 180, 180))
+        greet_text = font2.render("Благодарим вас за прохождение. "
+                                 "Надеемся вы получили яркие впечатления от игры", True, (180, 180, 180))
+        rect2 = pygame.Rect(1280 / 2 - 100, 760 / 2 + 100, 180, 28)
         pygame.draw.rect(screen, pygame.Color("black"), rect2)
 
         running_fon = True
@@ -408,13 +410,9 @@ if __name__ == '__main__':
                 if action2.type == pygame.MOUSEBUTTONDOWN:
                     if rect2.collidepoint(action2.pos):
                         sys.exit(0)
-                if action2.type == pygame.MOUSEBUTTONDOWN:
-                    if rect1.collidepoint(action2.pos):
-                        # какой то код
-                        pause_time = 0
-
-            screen.blit(end_text, [1280 / 2 - 300, 760 / 2])
-            screen.blit(restart_text, [1280 / 2 + 100, 760 / 2])
+            screen.blit(greet_text, [150, 760 / 2 + 110])
+            screen.blit(end_text, [1280 / 2 - 90, 760 / 2 + 200])
+            screen.blit(pygame.transform.scale(img, [250, 370]), [1280 / 2 - 120, 50])
             if not running_fon:
                 screen.fill(0)
             pygame.display.update()
@@ -579,16 +577,16 @@ if __name__ == '__main__':
         all_sprites.update()
         all_sprites.draw(screen)
 
-
+    end_game_func()
     draw_intro()
     draw_history()
     startTime = time.time()
     pygame.mixer.music.play()
 
-    while running:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                pygame.quit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     state = False
