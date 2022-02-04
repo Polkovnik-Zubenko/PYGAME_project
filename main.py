@@ -235,30 +235,6 @@ if __name__ == '__main__':
         def __init__(self, sheet, x, y, *groups):
             super().__init__(sheet, x, y, *groups)
 
-
-    class AnimateEndGame(pygame.sprite.Sprite):
-        def __init__(self, sheet, columns, rows, x, y):
-            super().__init__(end_sprites)
-            self.frames = []
-            self.cut_sheet(sheet, columns, rows)
-            self.cur_frame = 0
-            self.image = self.frames[self.cur_frame]
-            self.rect = self.rect.move(x, y)
-
-        def cut_sheet(self, sheet, columns, rows):
-            self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                    sheet.get_height() // rows)
-            for j in range(rows):
-                for i in range(columns):
-                    frame_location = (self.rect.w * i, self.rect.h * j)
-                    self.frames.append(sheet.subsurface(pygame.Rect(
-                        frame_location, self.rect.size)))
-
-        def update(self):
-            self.cur_frame = int((time.time() - start_frame) * 7 % 5)
-            self.image = self.frames[self.cur_frame]
-
-
     def draw_intro():
         img_fon = pygame.transform.scale(pygame.image.load('data/1.png'), [1280, 760])
         font = pygame.font.SysFont("calibri", 35)
@@ -407,8 +383,6 @@ if __name__ == '__main__':
 
     asteroid_sprite = AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
 
-    end_sprite = AnimateEndGame(load_image('end.png'), 6, 1, 540, 300)
-
     background_image = load_image('background.png')
 
     pause_text = pygame.font.SysFont('Consolas', 32).render('Pause', True, pygame.color.Color('White'))
@@ -427,6 +401,9 @@ if __name__ == '__main__':
 
     def draw_window():
         global counter_bubbles, time_now, difficult_flag, win_or_lose_flag
+
+        if counter_bubbles < 0:
+            counter_bubbles = 0
 
         x_rel = x_pos % width
         x_part2 = x_rel - width if x_rel > 0 else x_rel + width
