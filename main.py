@@ -15,12 +15,13 @@ if __name__ == '__main__':
     fps = 60
     start_frame = time.time()
     clock = pygame.time.Clock()
-    counter_bubbles = 18
+    counter_bubbles = 0
     state = True
     time_now = 0
     pause_start = 0
     pause_time = 0
     difficult_flag = 0
+    win_or_lose_flag = False
     pygame.mixer.music.load('data/background_sound.mp3')
     sound_bubble = pygame.mixer.Sound('data/bubble_sound.mp3')
     sound_race_won = pygame.mixer.Sound('data/race_won.mp3')
@@ -368,13 +369,14 @@ if __name__ == '__main__':
 
         running_fon = True
         while running_fon:
+            screen.fill((0, 0, 0))
             for action2 in pygame.event.get():
                 if action2.type == pygame.QUIT:
                     pygame.quit()
                 if action2.type == pygame.MOUSEBUTTONDOWN:
                     if rect2.collidepoint(action2.pos):
                         sys.exit(0)
-            screen.blit(greet_text, [150, 760 / 2 + 110])
+            screen.blit(greet_text, [90, 760 / 2 + 110])
             screen.blit(end_text, [1280 / 2 - 90, 760 / 2 + 200])
             screen.blit(pygame.transform.scale(img, [250, 370]), [1280 / 2 - 120, 50])
             if not running_fon:
@@ -424,7 +426,7 @@ if __name__ == '__main__':
 
 
     def draw_window():
-        global counter_bubbles, time_now, difficult_flag
+        global counter_bubbles, time_now, difficult_flag, win_or_lose_flag
 
         x_rel = x_pos % width
         x_part2 = x_rel - width if x_rel > 0 else x_rel + width
@@ -433,7 +435,7 @@ if __name__ == '__main__':
 
         time_now = float('%s' % totalTime) - pause_time
 
-        time_const = 12.01
+        time_const = 62.01
 
         if time_now < time_const:
             rand = random.randint(1, 10000)
@@ -485,6 +487,9 @@ if __name__ == '__main__':
                     sound_bubble.play()
                     counter_bubbles += 1
 
+        elif time_now > time_const + 24:
+            end_game_func()
+
         elif time_now > time_const + 5:
 
             screen.blit(background_image, (0, 0))
@@ -498,44 +503,41 @@ if __name__ == '__main__':
                                                                    pygame.color.Color('White'))
             lost_text2 = pygame.font.SysFont('Consolas', 32).render(
                 'Наверное Джим уже больше никогда не вернется домой...', True, pygame.color.Color('White'))
-            win_or_lose_flag = 0
             if jim_sprites.get_coords()[0] > 1650:
                 pygame.mixer.music.pause()
                 if difficult_flag == 1 and counter_bubbles < 6:
                     jim_sprites.end_game(counter_bubbles < 6)
                     sound_race_lost.play()
-                    win_or_lose_flag = 1
-                elif difficult_flag == 1 and counter_bubbles > 6:
+                    win_or_lose_flag = False
+                if difficult_flag == 1 and counter_bubbles > 6:
                     jim_sprites.end_game(counter_bubbles < 6)
                     sound_race_won.play()
-                    win_or_lose_flag = 2
+                    win_or_lose_flag = True
                 if difficult_flag == 2 and counter_bubbles < 10:
                     jim_sprites.end_game(counter_bubbles < 10)
                     sound_race_lost.play()
-                    win_or_lose_flag = 1
-                elif difficult_flag == 2 and counter_bubbles > 10:
+                    win_or_lose_flag = False
+                if difficult_flag == 2 and counter_bubbles > 10:
                     jim_sprites.end_game(counter_bubbles < 10)
                     sound_race_won.play()
-                    win_or_lose_flag = 2
+                    win_or_lose_flag = True
                 if difficult_flag == 3 and counter_bubbles < 13:
                     jim_sprites.end_game(counter_bubbles < 13)
                     sound_race_lost.play()
-                    win_or_lose_flag = 1
-                elif difficult_flag == 3 and counter_bubbles > 13:
+                    win_or_lose_flag = False
+                if difficult_flag == 3 and counter_bubbles > 13:
                     jim_sprites.end_game(counter_bubbles < 13)
                     sound_race_won.play()
-                    win_or_lose_flag = 2
-
+                    win_or_lose_flag = True
             game_ending_sprites.update()
             game_ending_sprites.draw(screen)
 
-            if jim_sprites.rect.y > 780:
-                if win_or_lose_flag == 2:
+            if jim_sprites.get_coords()[1] > 780:
+                if win_or_lose_flag:
                     screen.blit(won_text, (100, 100))
-                elif win_or_lose_flag == 1:
+                else:
                     screen.blit(lost_text, (400, 100))
                     screen.blit(lost_text2, (150, 134))
-                end_game_func()
 
         all_sprites.update()
 
@@ -561,6 +563,7 @@ if __name__ == '__main__':
         if state:
             clock.tick(fps)
             draw_window()
+            pygame.display.update()
             bubbles_chet_func()
             keys = pygame.key.get_pressed()
             if keys[pygame.K_d]:
