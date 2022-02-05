@@ -196,7 +196,7 @@ if __name__ == '__main__':
             if self.rect.y < 100:
                 self.rect.y = self.rect.y
             else:
-                self.y = self.y - 0.8125 / 6
+                self.y = self.y - 0.8125 / 5.3
                 self.rect.y = self.y
 
 
@@ -436,12 +436,12 @@ if __name__ == '__main__':
             elif difficult_flag == 2:
                 if rand in [i for i in range(9940, 10000)]:
                     BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
-                if rand in [i for i in range(9890, 9950)]:
+                if rand in [i for i in range(9870, 9950)]:
                     AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
             elif difficult_flag == 3:
                 if rand in [i for i in range(9950, 10000)]:
                     BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
-                if rand in [i for i in range(9890, 9960)]:
+                if rand in [i for i in range(9860, 9960)]:
                     AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
 
             for asteroid in asteroid_sprites:
