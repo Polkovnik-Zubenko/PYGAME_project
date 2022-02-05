@@ -30,8 +30,6 @@ if __name__ == '__main__':
     all_sprites = pygame.sprite.Group()
     bubbles_sprites = pygame.sprite.Group()
     asteroid_sprites = pygame.sprite.Group()
-    end_sprites = pygame.sprite.Group()
-
     gameplay_sprites = pygame.sprite.Group()
     game_ending_sprites = pygame.sprite.Group()
 
@@ -112,8 +110,8 @@ if __name__ == '__main__':
         def ending_game(self):
             self.can_move = False
             if not self.game_ended:
-                self.rect.x += 4
-                self.rect.y -= 3
+                self.rect.x += 5
+                self.rect.y -= 4
 
         def end_game(self, is_lost=False):
             self.game_ended = True
@@ -124,8 +122,8 @@ if __name__ == '__main__':
 
         def update(self):
             if self.game_ended:
-                self.rect.x -= 3
-                self.rect.y += 2
+                self.rect.x -= 4
+                self.rect.y += 3
                 if self.is_lost:
                     self.cur_frame = int((time.time() - start_frame) * 7 % 9)
                     self.image = self.lost_frames[self.cur_frame]
@@ -214,16 +212,18 @@ if __name__ == '__main__':
             self.rect = self.rect.move(x, y)
             self.size_x = 20
             self.size_y = 20
+            self.speed_x = random.randint(-2, 2)
+            self.speed_y = random.randint(1, 2)
 
         def update(self):
-            self.size_x += 0.1
-            self.size_y += 0.1
+            self.size_x += 0.1 * self.speed_y
+            self.size_y += 0.1 * self.speed_y
             x = self.rect.x
             y = self.rect.y
             self.image = pygame.transform.scale(self.base_image, (self.size_x, self.size_y))
             self.rect = self.image.get_rect()
             self.mask = pygame.mask.from_surface(self.image)
-            self.rect = self.rect.move(x + random.randint(-5, 6), y + random.randint(0, 1))
+            self.rect = self.rect.move(x + self.speed_x, y + self.speed_y)
 
 
     class BubbleSprite(BaseMovingSprite):
@@ -235,11 +235,12 @@ if __name__ == '__main__':
         def __init__(self, sheet, x, y, *groups):
             super().__init__(sheet, x, y, *groups)
 
+
     def draw_intro():
         img_fon = pygame.transform.scale(pygame.image.load('data/1.png'), [1280, 760])
         font = pygame.font.SysFont("calibri", 35)
-        text_welcome = font.render("Создатели: ", True, (180, 180, 180))
-        text_welcome2 = font.render("Александр Харченко и Сергеев Илья", True, (180, 180, 180))
+        text_welcome = font.render("Создатели: ", True, (255, 255, 255))
+        text_welcome2 = font.render("Александр Харченко и Сергеев Илья", True, (255, 255, 255))
         button = font.render('Далее', True, (0, 0, 255))
         width_rect, height_rect = 100, 45
         rect = pygame.Rect(880, 670, width_rect, height_rect)
@@ -268,23 +269,28 @@ if __name__ == '__main__':
         font = pygame.font.SysFont("calibri", 24)
         font_button_choice = pygame.font.SysFont("calibri", 24, True)
         text = font.render("Давным-давно, в далекой-далекой галактике развитая цивилизация "
-                           "разумных червей находиться ", True, (180, 180, 180))
+                           "разумных червей находиться ", True, (255, 255, 255))
         text2 = font.render("в шаге от исчезновения, одной из главных причин становится недостаток кислорода "
-                            "на планете.", True, (180, 180, 180))
+                            "на планете.", True, (255, 255, 255))
         text3 = font.render("В Сенате было принято решение отправить в космос миллионы "
-                            "сборщиков воздуха. Однако", True, (180, 180, 180))
+                            "сборщиков воздуха. Однако", True, (255, 255, 255))
         text4 = font.render("приспособиться к открытому космосу "
-                            "удалось далеко не всем. Наш главный герой - червяк Джим,", True, (180, 180, 180))
+                            "удалось далеко не всем. Наш главный герой - червяк Джим,", True, (255, 255, 255))
         text5 = font.render("один из немногих счастливчиков, кто смог это сделать. Ваша же цель "
-                            "управляя им A(влево) и D(вправо)", True, (180, 180, 180))
+                            "управляя им A(влево) и D(вправо)", True, (255, 255, 255))
         text6 = font.render("собирать драгоценные пузырьки воздуха. Увы, без нужного количества кислорода "
-                            "вернуться домой", True, (180, 180, 180))
+                            "вернуться домой", True, (255, 255, 255))
         text7 = font.render("невозможно. Доберитесь до планеты как можно быстрее, но будьте "
-                            "осторожны! Перед началом игры", True, (180, 180, 180))
-        text8 = font.render("необходимо выбрать уровень сложности. Удачи!", True, (180, 180, 180))
+                            "осторожны! Перед началом игры", True, (255, 255, 255))
+        text8 = font.render("необходимо выбрать уровень сложности. Удачи!", True, (255, 255, 255))
         easy_level = font.render("Легкий уровень сложности", True, (0, 255, 0))
         medium_level = font.render("Обычный уровень сложности", True, (255, 255, 0))
         hard_level = font.render("Тяжелый уровень сложности", True, (255, 0, 0))
+
+        easy_level_line = font_button_choice.render(" ", True, (0, 255, 0))
+        medium_level_line = font_button_choice.render(" ", True, (255, 255, 0))
+        hard_level_line = font_button_choice.render(" ", True, (255, 0, 0))
+
         width_rect_level, height_rect_level = 320, 30
         rect_1 = pygame.Rect(50, 580, width_rect_level, height_rect_level)
         rect_2 = pygame.Rect(480, 580, width_rect_level, height_rect_level)
@@ -301,22 +307,29 @@ if __name__ == '__main__':
                     pygame.quit()
                 if action2.type == pygame.MOUSEBUTTONDOWN:
                     if rect_1.collidepoint(action2.pos):
-                        easy_level = font_button_choice.render("_______________________", True, (0, 255, 0))
+                        easy_level_line = font_button_choice.render("_______________________", True, (0, 255, 0))
+                        medium_level_line = font_button_choice.render(" ", True, (255, 255, 0))
+                        hard_level_line = font_button_choice.render(" ", True, (255, 0, 0))
                         pygame.display.update()
                         difficult_flag = 1
                         choice_diff = True
                     if rect_2.collidepoint(action2.pos):
-                        medium_level = font_button_choice.render("_________________________", True, (255, 255, 0))
+                        easy_level_line = font_button_choice.render(" ", True, (0, 255, 0))
+                        medium_level_line = font_button_choice.render("_________________________", True, (255, 255, 0))
+                        hard_level_line = font_button_choice.render(" ", True, (255, 0, 0))
                         difficult_flag = 2
                         choice_diff = True
                     if rect_3.collidepoint(action2.pos):
-                        hard_level = font_button_choice.render("________________________", True, (255, 0, 0))
+                        easy_level_line = font_button_choice.render(" ", True, (0, 255, 0))
+                        medium_level_line = font_button_choice.render(" ", True, (255, 255, 0))
+                        hard_level_line = font_button_choice.render("________________________", True, (255, 0, 0))
                         difficult_flag = 3
                         choice_diff = True
                     if choice_diff:
                         if rect.collidepoint(action2.pos):
                             running_fon = False
                             pause_time = 0
+            screen.fill(0)
             screen.blit(text, [116, 124])
             screen.blit(text2, [116, 158])
             screen.blit(text3, [116, 192])
@@ -329,9 +342,11 @@ if __name__ == '__main__':
             screen.blit(medium_level, [480, 580])
             screen.blit(hard_level, [940, 580])
             screen.blit(text_play, [1280 / 2 - 70, 650])
-            if not running_fon:
-                screen.fill(0)
+            screen.blit(easy_level_line, [50, 580])
+            screen.blit(medium_level_line, [480, 580])
+            screen.blit(hard_level_line, [940, 580])
             pygame.display.update()
+
 
     def end_game_func():
         img = pygame.image.load('data/foto.png')
@@ -379,13 +394,11 @@ if __name__ == '__main__':
 
     icon_jim_sprite = AnimateIconJim(load_image('icon_jim.png'), 30, 650, gameplay_sprites)
 
-    bubble_sprite = BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
-
-    asteroid_sprite = AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
-
     background_image = load_image('background.png')
 
     pause_text = pygame.font.SysFont('Consolas', 32).render('Pause', True, pygame.color.Color('White'))
+    pause_text2 = pygame.font.SysFont('Consolas', 24).render('Press SPACE to return the game', True,
+                                                             pygame.color.Color(180, 180, 180))
 
 
     def bubbles_chet_func():
@@ -396,7 +409,6 @@ if __name__ == '__main__':
         text = font.render(f"{counter_bubbles} X ", True, (180, 180, 180))
         screen.blit(pygame.transform.scale(bubble_img, [50, 50]), [1220, 10])
         screen.blit(text, [1155, 21])
-        pygame.display.update()
 
 
     def draw_window():
@@ -419,17 +431,17 @@ if __name__ == '__main__':
             if difficult_flag == 1:
                 if rand in [i for i in range(9930, 10000)]:
                     BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
-                if rand in [i for i in range(9940, 10000)]:
+                if rand in [i for i in range(9880, 9940)]:
                     AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
             elif difficult_flag == 2:
                 if rand in [i for i in range(9940, 10000)]:
                     BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
-                if rand in [i for i in range(9940, 10000)]:
+                if rand in [i for i in range(9890, 9950)]:
                     AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
             elif difficult_flag == 3:
                 if rand in [i for i in range(9950, 10000)]:
                     BubbleSprite(load_image('bubble.png'), 520, 230, bubbles_sprites, gameplay_sprites)
-                if rand in [i for i in range(9930, 10000)]:
+                if rand in [i for i in range(9890, 9960)]:
                     AsteroidSprite(load_image('asteroid.png'), 520, 230, asteroid_sprites, gameplay_sprites)
 
             for asteroid in asteroid_sprites:
@@ -464,7 +476,7 @@ if __name__ == '__main__':
                     sound_bubble.play()
                     counter_bubbles += 1
 
-        elif time_now > time_const + 24:
+        elif time_now > time_const + 26:
             end_game_func()
 
         elif time_now > time_const + 5:
@@ -488,8 +500,8 @@ if __name__ == '__main__':
                     win_or_lose_flag = False
                 if difficult_flag == 1 and counter_bubbles > 6:
                     jim_sprites.end_game(counter_bubbles < 6)
-                    sound_race_won.play()
                     win_or_lose_flag = True
+                    sound_race_won.play()
                 if difficult_flag == 2 and counter_bubbles < 10:
                     jim_sprites.end_game(counter_bubbles < 10)
                     sound_race_lost.play()
@@ -518,6 +530,7 @@ if __name__ == '__main__':
 
         all_sprites.update()
 
+
     draw_intro()
     draw_history()
     startTime = time.time()
@@ -530,7 +543,7 @@ if __name__ == '__main__':
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     state = False
-                    pygame.mixer.music.stop()
+                    pygame.mixer.music.pause()
                     pause_start = time.time()
                 if event.key == pygame.K_SPACE:
                     state = True
@@ -540,8 +553,6 @@ if __name__ == '__main__':
         if state:
             clock.tick(fps)
             draw_window()
-            pygame.display.update()
-            bubbles_chet_func()
             keys = pygame.key.get_pressed()
             if keys[pygame.K_d]:
                 jim_sprites.move_right()
@@ -549,6 +560,8 @@ if __name__ == '__main__':
                 jim_sprites.move_left()
             x_pos += v / fps
         else:
-            screen.blit(pause_text, (640, 330))
+            screen.blit(pause_text, (600, 80))
+            screen.blit(pause_text2, (460, 370))
+        bubbles_chet_func()
         pygame.display.flip()
     pygame.quit()
